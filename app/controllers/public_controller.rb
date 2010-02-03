@@ -5,7 +5,7 @@ class PublicController < ApplicationController
   before_filter :generate_menu
 
   def index
-    default_page = Configuration.get_one('default_page')
+    default_page = Configuration.get_one(Customer.current)
     if default_page.nil?
       render :text => "Oletussivua ei ole määritetty"
       return

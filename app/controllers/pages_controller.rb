@@ -104,7 +104,8 @@ class PagesController < ApplicationController
 
 
   def set_default
-    @cfg = Configuration.find_or_create_by_name("default_page")
+#    @cfg = Configuration.find_or_create_by_name("default_page")
+    @cfg = Configuration.find_or_create_by_customer_id(Customer.current)
     @cfg.value = params[:default_page]
     if @cfg.save
       flash[:notice] = "Oletussivu tallennettu"

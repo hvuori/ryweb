@@ -4,7 +4,6 @@ class Occasions::ExportController < ApplicationController
   before_filter :login_required
 
   def new
-
     respond_to do |format|
       format.html
     end
@@ -44,14 +43,48 @@ class Occasions::ExportController < ApplicationController
         end
       end
       filename = "Tapahtumat-#{start_time.strftime("%d_%m") + "-" + end_time.strftime("%d_%m")}.csv"
-      send_data(csv_string,
+
+      if client_os().match("windows")
+         send_data(csv_string,
                 :type => 'text/csv; charset=iso-8859-15; header=present',
                 :filename => filename)
-
+      else
+         send_data(csv_string,
+                :type => 'text/csv; charset=utf-8; header=present',
+                :filename => filename)
+      end
     end
   end
 
+
+  def client_os()
+
+    agent = request.headers["HTTP_USER_AGENT"].downcase
+
+    if agent.match("windows")
+       return "windows"
+    end
+    if agent.match("linux") || agent.match("ubuntu") || agent.match("unix")
+       return "linux"
+    end
+    # match both "macintosh" and "mac OS"
+    if agent.match("mac")
+       return "mac"
+    end
+    return "dos"
+  end
+
+
   def convert_str(str)
-    Iconv.conv("ISO-8859-15", "utf-8", str)
+
+   # This code fragment tries to convert exported text into proper character set according to the OS data
+   # For Linux, it's relatives and Mac it keeps UTF and for MS operating systems it goes for ISO
+
+    if client_os.match("windows") || client_os.match("dos")
+       Iconv.conv("ISO-8859-15", "utf-8", str)
+    else
+       # conserve UTF
+       str
+    end
   end
 end
